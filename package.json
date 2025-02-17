@@ -1,0 +1,29 @@
+{
+  "name": "@jnode/server",
+  "version": "1.0.0",
+  "description": "Simple web server package for Node.js.",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "echo \"Hello, server.\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/japple-jnode/server.git"
+  },
+  "keywords": [
+    "JustNode",
+    "HTTP",
+    "HTTPS",
+    "HTTP2",
+    "Server",
+    "Web",
+    "Website",
+    "JustApple"
+  ],
+  "author": "JustApple <apple@justapple.tw>",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/japple-jnode/server/issues"
+  },
+  "homepage": "https://github.com/japple-jnode/server#readme"
+}
