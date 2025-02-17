@@ -10,7 +10,7 @@ by JustNode Dev Team / JustApple
 const processFinal = require('./final.js');
 const processError = require('./error.js');
 
-// Error handler function
+//error handler function
 async function handleStatus(req, res, map, p, e, status) {
 	let statusCode;
 	let defaultMap;
@@ -31,37 +31,37 @@ async function handleStatus(req, res, map, p, e, status) {
 			};
 				break;
 		default:
-			return status; // If status is not a special error, return it directly
+			return status; //if status is not a special error, return it directly
 	}
 	
 	return await processFinal(req, res, map[status] ?? defaultMap, p, e);
 }
 
-// Process function with error handling
+//process function with error handling
 async function safeProcessFinal(req, res, map, p, e, finalObject) {
 	try {
 		let status = await processFinal(req, res, finalObject, p, e);
 		
-		// Handle special status codes
+		//handle special status codes
 		status = await handleStatus(req, res, map, p, e, status);
 		
-		// Fall into loop error
+		//fall into loop error
 		if ((typeof status === 'string') && status.startsWith('!')) {
 			throw new Error('Process may fall into infinity loop.');
 		}
 		return status;
 	} catch (err) {
-		// Emit error
+		//emit error
 		e.emitError(err);
 		
-		// Internal server error
+		//internal server error
 		return processError(req, res, map, p, e);
 	}
 }
 
 //process HandleObject
 async function processHandle(req, res, map, p, e) {
-	// Protocol upgrade
+	//protocol upgrade
 	if (
 		req.headers.connection &&
 		req.headers.connection.toLowerCase() === 'upgrade' &&
@@ -70,17 +70,17 @@ async function processHandle(req, res, map, p, e) {
 		return await safeProcessFinal(req, res, map, p, e, map['^' + req.headers.upgrade]);
 	}
 	
-	// Method check
+	//method check
 	if (map['@' + req.method]) {
 		return await safeProcessFinal(req, res, map, p, e, map['@' + req.method]);
 	}
 	
-	// Get final object by function
+	//get final object by function
 	if (map['>']) {
 		return await safeProcessFinal(req, res, map, p, e, await map['>'](req, res, map, p, e));
 	}
 	
-	// Process final
+	//process final
 	return await safeProcessFinal(req, res, map, p, e, map);
 }
 
