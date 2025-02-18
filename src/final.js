@@ -110,6 +110,12 @@ async function processFinal(req, res, map, p, e) {
 		});
 	}
 	
+	//only headers or status code
+	if (map['+STATUS'] || map['+HEADERS']) {
+		res.writeHead(map['+STATUS'] ?? 200, map['+HEADERS']);
+		return;
+	}
+	
 	return '!404';
 }
 
