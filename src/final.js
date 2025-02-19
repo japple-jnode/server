@@ -17,7 +17,10 @@ const mimeTypes = require('./mime.json');
 //process FinalObject
 async function processFinal(req, res, map, p, e) {
 	//firewall
-	if (map['+FIREWALL'] && !(await map['+FIREWALL'](req, res, map, p, e))) return;
+	if (
+		(map['+FIREWALL'] ?? e.default['+FIREWALL']) &&
+		!(await (map['+FIREWALL'] ?? e.default['+FIREWALL'])(req, res, map, p, e))
+	) return;
 	
 	//custom function
 	if (map['FUNCTION']) return map['FUNCTION'](req, res, map, p, e);
