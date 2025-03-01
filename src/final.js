@@ -92,7 +92,9 @@ async function processFinal(req, res, map, p, e) {
 		
 		//get file size and check file exists
 		try {
-			fileSize = (await fsPromises.stat(file)).size;
+			const stat = await fsPromises.stat(file);
+			if (stat.isDirectory()) return '!404'; //return error for directory
+			fileSize = stat.size;
 		} catch (err) { return '!404'; } //return error
 		
 		//write head
