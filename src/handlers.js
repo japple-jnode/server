@@ -54,7 +54,7 @@ class DataHandler {
 // file handler: local file
 class FileHandler {
     constructor(file, options = {}) {
-        this.file = path.resolve(this.file);
+        this.file = path.resolve(file);
         this.options = options;
 
         // range may be disabled by `options.disableRange` or when `statusCode` is set to non-200 value
