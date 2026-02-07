@@ -264,10 +264,11 @@ We provide two methods to use them:
   - `<METHOD>/<path_segment>[/<path_segment>...]` [router](#class-serverrouter) | [handler-extended](#handler-extended) Used when the method matches; equals to `'/<path_segment>': r.Method({ '<METHOD>': <value> })`. E.G., `'GET/meow': 'Meow!'` (only works for HTTP method `'GET'`).
   - `@<METHOD>/<path_segment>[/<path_segment>...]` [router](#class-serverrouter) | [handler-extended](#handler-extended) Used when both the path resolver ends and the method matches; equals to `'/<path_segment>': r.Path(r.Method({ '<METHOD>': <value> }))`. E.G., `'@GET/meow': 'Meow!'` (only works for path `'/meow'` but not `'/meow/something'` and request method is `'GET'`).
   - `*` [router](#class-serverrouter) | [handler-extended](#handler-extended) Any path segment. E.G. `'*': h.Text('Meow? Nothing here!', { statusCode: 404 })`.
+  - `/%:<path_parameter_name>` [router](#class-serverrouter) | [handler-extended](#handler-extended) Match any segment (if exists) and save the segment to `ctx.params` by `<path_parameter_name>`. Do the similar thing as [`PathArgRouter`](#router-pathargrouterparamname-next).
 
 `PathRouter` is probably the most important router; almost every server needs it!
 
-By the way, we **DO NOT** support `'/*'` as a universal matching character, don't try this.
+By the way, if you’re looking for a universal matching character, use `'/%:'` instead of `'/*'` (this will match to `'*'` in a literal sense).
 
 #### How it works?
 

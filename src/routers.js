@@ -29,20 +29,30 @@ class PathRouter {
             // key format: '[@ (path end check)][METHOD (method check)]/path/segments'
             // example: '@ GET /cat/names', 'POST /cats', '/api'
             const routeEnd = key.startsWith('@');
-            const routeMethod = key.substring(routeEnd ? 1 : 0, firstSlashIndex).trim().toUpperCase();
-            const routePath = key.substring(firstSlashIndex).split('/').slice(1).map(decodeURIComponent);
+            const routeMethod = key.substring(routeEnd ? 1 : 0, firstSlashIndex).trim();
+            const routePath = key.substring(firstSlashIndex).split('/').slice(1);
 
             // expand map
             let current = this.map;
-            for (const segment of routePath) {
-                if (!current['/' + segment]) current['/' + segment] = {};
-                current = current['/' + segment];
+            let args = [];
+            for (let segment of routePath) {
+                if (segment.startsWith('%:')) {
+                    args.push(segment.substring(2));
+                    if (!current[':']) current[':'] = {};
+                    current = current[':'];
+                    continue;
+                }
+
+                segment = '/' + decodeURIComponent(segment);
+                if (!current[segment]) current[segment] = {};
+                current = current[segment];
             }
 
             // '*' for non-end check, '@' for end check
             // '*' for any method, 'METHOD' for specific method
             if (!current[routeEnd ? '@' : '*']) current[routeEnd ? '@' : '*'] = {};
             current[routeEnd ? '@' : '*'][routeMethod || '*'] = value;
+            if (args.length > 0) current[routeEnd ? '@' : '*']['::' + (routeMethod || '*')] = args;
         }
     }
 
@@ -52,14 +62,23 @@ class PathRouter {
         let result = this.map['*'];
         let resultPointer = env.pathPointer;
         let current = this.map;
+        let resultArgs = [];
+        let currentArgs = [];
+        let resultArgNames = [];
         while (env.pathPointer < env.path.length) {
-            const segment = '/' + env.path[env.pathPointer];
-            if (!current[segment]) break;
+            let segment = '/' + env.path[env.pathPointer];
+            if (!current[segment] && !current[':']) break;
+            if (!current[segment]) {
+                segment = ':';
+                currentArgs.push(env.path[env.pathPointer]);
+            }
 
             // prepare fallback
             if (current[segment]['*']?.['*'] || current[segment]['*']?.[ctx.method]) {
                 result = current[segment]['*'][ctx.method] ?? current[segment]['*']['*'];
                 resultPointer = env.pathPointer + 1;
+                resultArgs = [...currentArgs];
+                resultArgNames = current[segment]['*']['::' + ctx.method] ?? current[segment]['*']['::*'];
             }
 
             current = current[segment];
@@ -69,10 +88,15 @@ class PathRouter {
             if (env.pathPointer >= env.path.length && (current['@']?.['*'] || current['@']?.[ctx.method])) {
                 result = current['@'][ctx.method] ?? current['@']['*'];
                 resultPointer = env.pathPointer;
+                resultArgs = currentArgs;
+                resultArgNames = current['@']['::' + ctx.method] ?? current['@']['::*'];
             }
         }
 
         env.pathPointer = resultPointer;
+        if (resultArgNames) resultArgs.forEach((arg, index) => {
+            ctx.params[resultArgNames[index]] = arg;
+        });
         return result;
     }
 }
