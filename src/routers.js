@@ -62,9 +62,8 @@ class PathRouter {
         let result = this.map['*'];
         let resultPointer = env.pathPointer;
         let current = this.map;
-        let resultArgs = [];
         let currentArgs = [];
-        let resultArgNames = [];
+        let resultArgNames;
         while (env.pathPointer < env.path.length) {
             let segment = '/' + env.path[env.pathPointer];
             if (!current[segment] && !current[':']) break;
@@ -77,7 +76,6 @@ class PathRouter {
             if (current[segment]['*']?.['*'] || current[segment]['*']?.[ctx.method]) {
                 result = current[segment]['*'][ctx.method] ?? current[segment]['*']['*'];
                 resultPointer = env.pathPointer + 1;
-                resultArgs = [...currentArgs];
                 resultArgNames = current[segment]['*']['::' + ctx.method] ?? current[segment]['*']['::*'];
             }
 
@@ -88,15 +86,17 @@ class PathRouter {
             if (env.pathPointer >= env.path.length && (current['@']?.['*'] || current['@']?.[ctx.method])) {
                 result = current['@'][ctx.method] ?? current['@']['*'];
                 resultPointer = env.pathPointer;
-                resultArgs = currentArgs;
                 resultArgNames = current['@']['::' + ctx.method] ?? current['@']['::*'];
             }
         }
 
         env.pathPointer = resultPointer;
-        if (resultArgNames) resultArgs.forEach((arg, index) => {
-            ctx.params[resultArgNames[index]] = arg;
-        });
+        if (resultArgNames) {
+            const len = resultArgNames.length;
+            for (let i = 0; i < len; i++) {
+                ctx.params[resultArgNames[i]] = currentArgs[i];
+            }
+        }
         return result;
     }
 }
@@ -127,13 +127,22 @@ class HostRouter {
 
             // expand map
             let current = this.map;
+            let args = [];
             for (const segment of routeDomain) {
+                if (segment.startsWith('%:')) {
+                    args.push(segment.substring(2));
+                    if (!current[':']) current[':'] = {};
+                    current = current[':'];
+                    continue;
+                }
+
                 if (!current['.' + segment]) current['.' + segment] = {};
                 current = current['.' + segment];
             }
 
             // '*' for non-end check, '@' for end check
             current[routeEnd ? '@' : '*'] = value;
+            if (args.length > 0) current['::'] = args;
         }
     }
 
@@ -143,14 +152,21 @@ class HostRouter {
         let result = this.map['*'];
         let resultPointer = env.hostPointer;
         let current = this.map;
+        let currentArgs = [];
+        let resultArgNames;
         while (env.hostPointer < env.host.length) {
-            const segment = '.' + env.host[env.hostPointer];
-            if (!current[segment]) break;
+            let segment = '.' + env.host[env.hostPointer];
+            if (!current[segment] && !current[':']) break;
+            if (!current[segment]) {
+                segment = ':';
+                currentArgs.push(env.host[env.hostPointer]);
+            }
 
             // prepare fallback
             if (current[segment]['*']) {
                 result = current[segment]['*'];
                 resultPointer = env.hostPointer + 1;
+                resultArgNames = current[segment]['::'];
             }
 
             current = current[segment];
@@ -164,6 +180,12 @@ class HostRouter {
         }
 
         env.hostPointer = resultPointer;
+        if (resultArgNames) {
+            const len = resultArgNames.length;
+            for (let i = 0; i < len; i++) {
+                ctx.params[resultArgNames[i]] = currentArgs[i];
+            }
+        }
         return result;
     }
 }
@@ -181,12 +203,13 @@ class MethodRouter {
 
 // function router: a simple router that allows you to make custom routing logic
 class FunctionRouter {
-    constructor(fn) {
+    constructor(fn, ext) {
         this.fn = fn;
+        this.ext = ext;
     }
 
     route(env, ctx) {
-        return this.fn(env, ctx);
+        return this.fn(env, ctx, this.ext);
     }
 }
 
@@ -237,12 +260,11 @@ class SetCodeRouter {
 module.exports = {
     PathRouter, HostRouter, MethodRouter, FunctionRouter, PathArgRouter, HostArgRouter, SetCodeRouter,
     routerConstructors: {
-        Path: (...args) => new PathRouter(...args),
-        Host: (...args) => new HostRouter(...args),
-        Method: (...args) => new MethodRouter(...args),
-        Function: (...args) => new FunctionRouter(...args),
-        PathArg: (...args) => new PathArgRouter(...args),
-        HostArg: (...args) => new HostArgRouter(...args),
-        SetCode: (...args) => new SetCodeRouter(...args)
+        Path: (end, map) => new PathRouter(end, map),
+        Host: (end, map) => new HostRouter(end, map),
+        Method: (methodMap) => new MethodRouter(methodMap),
+        Function: (fn, ext) => new FunctionRouter(fn, ext),
+        PathArg: (name, next) => new PathArgRouter(name, next),
+        SetCode: (handlers, next) => new SetCodeRouter(handlers, next)
     }
 };

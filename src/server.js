@@ -14,6 +14,7 @@ const http2 = require('http2');
 const path = require('path');
 const stream = require('stream');
 const EventEmitter = require('events');
+const constants = require('constants');
 
 // server class
 class Server extends EventEmitter {
@@ -106,11 +107,12 @@ class Server extends EventEmitter {
             } else if (typeof handler === 'function') { // function
                 await handler(ctx, env);
             } else if (typeof handler === 'string') { // string
+                const data = Buffer.from(handler, 'utf8');
                 ctx.res.writeHead(200, {
                     'Content-Type': 'text/plain; charset=utf-8',
-                    'Content-Length': Buffer.byteLength(handler, 'utf8')
+                    'Content-Length': data.length
                 });
-                ctx.res.end(handler, 'utf8');
+                ctx.res.end(data);
             } else if (handler instanceof Uint8Array) { // buffer
                 ctx.res.writeHead(200, {
                     'Content-Type': 'application/octet-stream',
@@ -130,11 +132,12 @@ class Server extends EventEmitter {
                 } else if (typeof handler === 'function') { // function
                     await handler(ctx, env);
                 } else if (typeof handler === 'string') { // string
+                    const data = Buffer.from(handler, 'utf8');
                     ctx.res.writeHead(code, {
                         'Content-Type': 'text/plain; charset=utf-8',
-                        'Content-Length': Buffer.byteLength(handler, 'utf8')
+                        'Content-Length': data.length
                     });
-                    ctx.res.end(handler, 'utf8');
+                    ctx.res.end(data);
                 } else if (handler instanceof Uint8Array) { // buffer
                     ctx.res.writeHead(code, {
                         'Content-Type': 'application/octet-stream',
@@ -164,11 +167,12 @@ class Server extends EventEmitter {
                 } else if (typeof handler === 'function') { // function
                     await handler(ctx, env);
                 } else if (typeof handler === 'string') { // string
+                    const data = Buffer.from(handler, 'utf8');
                     ctx.res.writeHead(code, {
                         'Content-Type': 'text/plain; charset=utf-8',
-                        'Content-Length': Buffer.byteLength(handler, 'utf8')
+                        'Content-Length': data.length
                     });
-                    ctx.res.end(handler, 'utf8');
+                    ctx.res.end(data);
                 } else if (handler instanceof Uint8Array) { // buffer
                     ctx.res.writeHead(code, {
                         'Content-Type': 'application/octet-stream',

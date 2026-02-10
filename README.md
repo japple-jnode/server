@@ -83,6 +83,7 @@ Also, we provide some powerful built-in routers and handlers so you can start bu
 - `options` [\<Object\>](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object)
   - `maxRoutingSteps` [\<number\>](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#number_type) The max steps for routing; when exceeded but still getting another router, it'll throw the client a **508** error. **Default:** `50`.
   - `enableHTTP2` [\<boolean\>](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#boolean_type) Enable HTTP/2 support (with `node:http2` [Compatibility API](https://nodejs.org/docs/latest/api/http2.html#compatibility-api)). **Default:** `false`.
+  - `codeHandlers` [\<Object\>](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object) Global status code handlers. Keys are HTTP status codes, values are [handlers-extended](#handler-extended).
   - Options in [`http.createServer()`](https://nodejs.org/docs/latest/api/http.html#httpcreateserveroptions-requestlistener), [`https.createServer()`](https://nodejs.org/docs/latest/api/https.html#httpscreateserveroptions-requestlistener), [`http2.createServer()`](https://nodejs.org/docs/latest/api/http2.html#http2createserveroptions-onrequesthandler), or [`http2.createSecureServer()`](https://nodejs.org/docs/latest/api/http2.html#http2createsecureserveroptions-onrequesthandler).
 - Returns: [\<server.Server\>](#class-serverserver)
 
@@ -268,6 +269,8 @@ We provide two methods to use them:
 
 `PathRouter` is probably the most important router; almost every server needs it!
 
+Please note that when defining only `/%:arg/b` and `/a/c`, requesting `/a/b` **WILL NOT** return the value of `/%:arg/b`. Instead, it will return `404`. This limitation is in place to improve performance, and we believe in designing a great API. If you still need this functionality, you can build your own router.
+
 By the way, if you’re looking for a universal matching character, use `'/%:'` instead of `'/*'` (this will match to `'*'` in a literal sense).
 
 #### How it works?
@@ -284,7 +287,8 @@ map = {
   '@/a/b': 'C!',
   'GET/a': 'D!',
   '@GET/a/b': 'E!',
-  '*': 'F!'
+  '@GET/%:arg/c': 'F!',
+  '*': 'G!'
 };
 
 // we will parse into
@@ -306,11 +310,19 @@ parsed = {
       }
     }
   },
-  '*': 'F!'
+  ':': {
+    '/c': {
+      '@': {
+        'GET': 'F!',
+        '::GET': [ 'arg' ]
+      }
+    }
+  },
+  '*': 'G!'
 };
 ```
 
-This format enables fast and flexible path routing while keeping it simple for developers.
+This format allows for fast and flexible path routing while maintaining simplicity for developers. However, as mentioned earlier, some specialized path matching will not be supported.
 
 ### Router: `HostRouter(end, map)`
 
@@ -319,6 +331,7 @@ This format enables fast and flexible path routing while keeping it simple for d
   - `.<host_segment>[.<host_segment>...]` [router](#class-serverrouter) | [handler-extended](#handler-extended) A simple host segment routing (reversed). E.G., `.example.com` will match `example.com`, `.localhost` will match `localhost`.
   - `@.<host_segment>[.<host_segment>...]` [router](#class-serverrouter) | [handler-extended](#handler-extended) Used when the host resolver ends here. E.G., `@.example.com` (only works for exactly `example.com` but not `sub.example.com`).
   - `*` [router](#class-serverrouter) | [handler-extended](#handler-extended) Any host segment.
+  - `.%:<host_parameter_name>` [router](#class-serverrouter) | [handler-extended](#handler-extended) Match any segment (if exists) and save the segment to `ctx.params` by `<host_parameter_name>`.
 
 ### Router: `MethodRouter(methodMap)`
 
@@ -327,9 +340,10 @@ This format enables fast and flexible path routing while keeping it simple for d
   - `*` [router](#class-serverrouter) | [handler-extended](#handler-extended) Any method, used as fallback.
 - Returns: [\<MethodRouter\>](#router-methodroutermethodmap) Routes based on HTTP method, returns 405 if no method matches.
 
-### Router: `FunctionRouter(fn)`
+### Router: `FunctionRouter(fn, ext)`
 
-- `fn` [\<Function\>](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function) A function with signature `(env, ctx) => router | handler-extended`.
+- `fn` [\<Function\>](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function) A function with signature `(env, ctx, ext) => router | handler-extended`.
+- `ext` [\<any\>] Passed to `func`.
 
 A simple router that allows you to implement custom routing logic.
 
@@ -410,8 +424,9 @@ Sends a JavaScript object serialized as JSON with `Content-Type: application/jso
 
 Redirects the request to a specified location. Supports both absolute URLs and dynamic redirects based on remaining path segments.
 
-### Handler: `FunctionHandler(func)`
+### Handler: `FunctionHandler(func, ext)`
 
-- `func` [\<Function\>](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function) A function with signature `(ctx, env) => void | Promise<void>`.
+- `func` [\<Function\>](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function) A function with signature `(ctx, env, ext) => void | Promise<void>`.
+- `ext` [\<any\>] Passed to `func`.
 
 Allows you to implement custom request handling logic directly within a function.

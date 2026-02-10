@@ -18,28 +18,38 @@ class DataHandler {
     constructor(data, options = {}) {
         this.data = data;
         this.options = options;
-    }
 
-    async handle(ctx, env) {
+        // prebuild headers
+        this._statusCode = this.options.statusCode ?? 200;
         if (typeof this.data === 'string') { // string
-            ctx.res.writeHead(this.options.statusCode ?? 200, {
+            this.data = Buffer.from(this.data, 'utf8');
+            this._headers = {
                 'Content-Type': 'text/plain; charset=utf-8',
-                'Content-Length': Buffer.byteLength(this.data, 'utf8'),
+                'Content-Length': this.data.length,
                 ...this.options.headers
-            });
-            ctx.res.end(this.data, 'utf8');
+            };
         } else if (this.data instanceof Uint8Array) { // buffer
-            ctx.res.writeHead(this.options.statusCode ?? 200, {
+            this._headers = {
                 'Content-Type': 'application/octet-stream',
                 'Content-Length': this.data.length,
                 ...this.options.headers
-            });
-            ctx.res.end(this.data);
-        } else if (stream.isReadable(this.data)) { // stream
-            ctx.res.writeHead(this.options.statusCode ?? 200, {
+            };
+        } else if (stream.isReadable(this.data)) {
+            this._headers = {
                 'Content-Type': 'application/octet-stream',
                 ...this.options.headers
-            });
+            };
+        } else {
+            throw new Error('Unsupported data type.');
+        }
+    }
+
+    async handle(ctx, env) {
+        if (this.data instanceof Uint8Array) { // buffer
+            ctx.res.writeHead(this._statusCode, this._headers);
+            ctx.res.end(this.data);
+        } else if (stream.isReadable(this.data)) { // stream
+            ctx.res.writeHead(this._statusCode, this._headers);
 
             try {
                 await stream.promises.pipeline(this.data, ctx.res);
@@ -184,19 +194,21 @@ class FolderHandler {
 // JSON handler: JSON object
 class JSONHandler {
     constructor(obj, options = {}) {
-        this.obj = obj;
+        this.data = Buffer.from(JSON.stringify(obj), 'utf8');
         this.options = options;
-    }
 
-    handle(ctx, env) {
-        const data = JSON.stringify(this.obj);
-
-        ctx.res.writeHead(this.options.statusCode ?? 200, {
+        // prebuild headers
+        this._statusCode = this.options.statusCode ?? 200;
+        this._headers = {
             'Content-Type': 'application/json; charset=utf-8',
             'Content-Length': Buffer.byteLength(data, 'utf8'),
             ...this.options.headers
-        });
-        ctx.res.end(data, 'utf8');
+        };
+    }
+
+    handle(ctx, env) {
+        ctx.res.writeHead(this.statusCode, this._headers);
+        ctx.res.end(this.data);
     }
 }
 
@@ -205,29 +217,34 @@ class RedirectHandler {
     constructor(location, options = {}) {
         this.location = location;
         this.options = options;
-    }
 
-    handle(ctx, env) {
-        ctx.res.writeHead(this.options.statusCode ?? 307, {
+        // prebuild headers
+        this._statusCode = this.options.statusCode ?? 307;
+        this._headers = {
             'Location': this.options.base ?
                 this.options.base +
                 (this.options.base.endsWith('/') ? '' : '/') +
                 env.path.slice(env.pathPointer).map(encodeURIComponent).join('/') :
                 this.location,
             ...this.options.headers
-        });
+        };
+    }
+
+    handle(ctx, env) {
+        ctx.res.writeHead(this._statusCode, this._headers);
         ctx.res.end();
     }
 }
 
 // function handler: custom function
 class FunctionHandler {
-    constructor(func) {
+    constructor(func, ext) {
         this.func = func;
+        this.ext = ext;
     }
 
     handle(ctx, env) {
-        return this.func(ctx, env);
+        return this.func(ctx, env, this.ext);
     }
 }
 
@@ -235,12 +252,12 @@ class FunctionHandler {
 module.exports = {
     DataHandler, TextHandler: DataHandler, FileHandler, FolderHandler, JSONHandler, RedirectHandler, FunctionHandler,
     handlerConstructors: {
-        Data: (...args) => new DataHandler(...args),
-        Text: (...args) => new DataHandler(...args),
-        File: (...args) => new FileHandler(...args),
-        Folder: (...args) => new FolderHandler(...args),
-        JSON: (...args) => new JSONHandler(...args),
-        Redirect: (...args) => new RedirectHandler(...args),
-        Function: (...args) => new FunctionHandler(...args)
+        Data: (data, options) => new DataHandler(data, options),
+        Text: (data, options) => new DataHandler(data, options),
+        File: (file, options) => new FileHandler(file, options),
+        Folder: (folder, options) => new FolderHandler(folder, options),
+        JSON: (obj, options) => new JSONHandler(obj, options),
+        Redirect: (location, options) => new RedirectHandler(location, options),
+        Function: (func, ext) => new FunctionHandler(func, ext)
     }
 };
