@@ -220,18 +220,17 @@ class RedirectHandler {
 
         // prebuild headers
         this._statusCode = this.options.statusCode ?? 307;
-        this._headers = {
+    }
+
+    handle(ctx, env) {
+        ctx.res.writeHead(this._statusCode, {
             'Location': this.options.base ?
                 this.options.base +
                 (this.options.base.endsWith('/') ? '' : '/') +
                 env.path.slice(env.pathPointer).map(encodeURIComponent).join('/') :
                 this.location,
             ...this.options.headers
-        };
-    }
-
-    handle(ctx, env) {
-        ctx.res.writeHead(this._statusCode, this._headers);
+        });
         ctx.res.end();
     }
 }
