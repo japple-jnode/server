@@ -183,6 +183,7 @@ class FolderHandler {
         const file = path.resolve(this.folder, ...env.path.slice(env.pathPointer));
 
         // safety check
+        if (file.includes(path.sep + '.') && !this.options.allowHiddenFile) throw 404;
         const rel = path.relative(this.folder, file);
         if (rel.startsWith('..') || path.isAbsolute(rel)) throw 404;
 

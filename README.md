@@ -401,7 +401,9 @@ Serves a single file with support for HTTP Range requests, caching headers, and 
 ### Handler: `FolderHandler(folder[, options])`
 
 - `folder` [\<string\>](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#string_type) Path to the folder to serve files from.
-- `options` [\<Object\>](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object) Same as [`FileHandler` options](#handler-filehandlerfile-options).
+- `options` [\<Object\>](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object)
+  - `allowHiddenFile` [\<boolean\>](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#boolean_type) Allows access to hidden directories and files (whose names begin with `.`).
+  - Same as [`FileHandler` options](#handler-filehandlerfile-options).
 
 Serves files from a folder based on remaining path segments. Automatically resolves paths and prevents directory traversal attacks. Internally uses `FileHandler`.
 
