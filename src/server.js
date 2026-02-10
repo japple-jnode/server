@@ -14,7 +14,6 @@ const http2 = require('http2');
 const path = require('path');
 const stream = require('stream');
 const EventEmitter = require('events');
-const constants = require('constants');
 
 // server class
 class Server extends EventEmitter {
