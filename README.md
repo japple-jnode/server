@@ -157,7 +157,8 @@ This class is a base interface that defines the structure of a **router**; it do
     - `address` [\<string\>](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#string_type) The remote address from `req.socket.remoteAddress`, may be modified by routers to resolve the original client IP behind a proxy.
     - `port` [\<number\>](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#number_type) The remote port from `req.socket.remotePort`, may be modified by routers to resolve the original client port behind a proxy.
   - `params` [\<Object\>](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object) The parameters including query string parameters; could also be injected by routers.
-  - `body` [\<stream.Readable\>](https://nodejs.org/docs/latest/api/stream.html#class-streamreadable) The request body stream (same as `req`).
+  - `body` [\<stream.Readable\>](https://nodejs.org/docs/latest/api/stream.html#class-streamreadable) The request body stream (`req`) or anything depends on the routers you used.
+  - `cookie` [\<Object\>](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object) The parsed cookie object.
 
 - Returns: [\<Promise\>](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise) | [\<router\>](#class-serverrouter) | [handler-extended](#handler-extended) Fulfills with a [router](#class-serverrouter) or [handler-extended](#handler-extended). Promise is not strictly required; synchronous functions are also acceptable.
 
