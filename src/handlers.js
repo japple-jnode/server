@@ -202,7 +202,7 @@ class JSONHandler {
         this._statusCode = this.options.statusCode ?? 200;
         this._headers = {
             'Content-Type': 'application/json; charset=utf-8',
-            'Content-Length': Buffer.byteLength(obj, 'utf8'),
+            'Content-Length': Buffer.byteLength(this.data, 'utf8'),
             ...this.options.headers
         };
     }
