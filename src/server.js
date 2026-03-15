@@ -124,13 +124,13 @@ class Server extends EventEmitter {
                 await stream.promises.pipeline(handler, ctx.res);
             } else if (typeof handler === 'number') { // status code
                 const code = handler;
-                handler = env.codeHandlers[code];
+                handler = env.codeHandlers[code] ?? env.codeHandlers['000'];
 
                 // handlers without code handlers
                 if (typeof handler?.handle === 'function') { // handler
-                    await handler.handle(ctx, env);
+                    await handler.handle(ctx, env, code);
                 } else if (typeof handler === 'function') { // function
-                    await handler(ctx, env);
+                    await handler(ctx, env, code);
                 } else if (typeof handler === 'string') { // string
                     const data = Buffer.from(handler, 'utf8');
                     ctx.res.writeHead(code, {
@@ -159,13 +159,13 @@ class Server extends EventEmitter {
 
             try {
                 const code = (typeof e === 'number') ? e : 500;
-                handler = env.codeHandlers[code];
+                handler = env.codeHandlers[code] ?? env.codeHandlers['000'];
 
                 // handlers without code handlers
                 if (typeof handler?.handle === 'function') { // handler
-                    await handler.handle(ctx, env);
+                    await handler.handle(ctx, env, code);
                 } else if (typeof handler === 'function') { // function
-                    await handler(ctx, env);
+                    await handler(ctx, env, code);
                 } else if (typeof handler === 'string') { // string
                     const data = Buffer.from(handler, 'utf8');
                     ctx.res.writeHead(code, {

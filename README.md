@@ -77,6 +77,16 @@ Also, we provide some powerful built-in routers and handlers so you can start bu
 
 # Reference
 
+## `server.util`
+
+- Type: [\<Object\>](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object)
+
+### `server.util.receiveBody(req[, max])`
+
+- `req` [\<http.IncomingMessage\>](https://nodejs.org/docs/latest/api/http.html#class-httpincomingmessage) | [\<http2.Http2ServerRequest\>](https://nodejs.org/docs/latest/api/http2.html#class-http2http2serverrequest) The request object.
+- `max` [\<number\>](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#number_type) Max bytes can receive, throws `413` when out of max size. **Default:** `1048576`.
+- Returns: [\<Buffer\>](https://nodejs.org/docs/latest/api/buffer.html#class-buffer)
+
 ## `server.createServer(router[, options])`
 
 - `router` [router](#class-serverrouter) | [handler-extended](#handler-extended) Same as the full filled return value of [`router.route(env, ctx)`](#routerrouteenv-ctx).
@@ -142,7 +152,7 @@ This class is a base interface that defines the structure of a **router**; it do
   - `pathPointer` [\<number\>](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#number_type) The path index pointer. Use it in your own router if needed to ensure capability with `PathRouter`.
   - `host` [\<string[]\>](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#string_type) The request host split by `.` and reversed. E.G. `'example.com'` will become `[ 'com', 'example' ]`.
   - `hostPointer` [\<number\>](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#number_type) The host index pointer. Use it in your own router if needed so they could be compatible with the core `HostRouter`.
-  - `codeHandlers` [\<Object\>](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object) Keys are HTTP status codes, and values are [handlers-extended](#handler-extended).
+  - `codeHandlers` [\<Object\>](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object) Keys are HTTP status codes, and values are [handlers-extended](#handler-extended). `'000'` as default/fallback error handler.
   - `i` [\<number\>](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#number_type) How many routers the request has gone through; do not change it in your own routers because the main loop increments it.
 - `ctx` [\<Object\>](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object)
   - `req` [\<http.IncomingMessage\>](https://nodejs.org/docs/latest/api/http.html#class-httpincomingmessage) | [\<http2.Http2ServerRequest\>](https://nodejs.org/docs/latest/api/http2.html#class-http2http2serverrequest) The request object.
@@ -204,10 +214,11 @@ If you even want to publish your routers or handlers on [npm](https://npmjs.com)
 
 This class is a base interface that defines the structure of a **handler**; it does not contain built-in logic. Any object with method [`.handle(ctx, env)`](#handlerhandlectx-env) will be viewed as a **handler**.
 
-### `handler.handle(ctx, env)`
+### `handler.handle(ctx, env[, code])`
 
 - `ctx` [\<Object\>](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object) Same as `ctx` of [`router.route(env, ctx)`](#routerrouteenv-ctx).
 - `env` [\<Object\>](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object) Same as `env` of [`router.route(env, ctx)`](#routerrouteenv-ctx).
+- `code` [\<number\>](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#number_type) The error code when used as an error handler. Normally you could ignore this field.
 
 Handlers can throw a numeric error code to call `codeHandlers`, e.g., `throw 404`.
 

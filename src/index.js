@@ -33,5 +33,6 @@ module.exports = {
 	Router, Handler,
 	...require('./routers.js'),
 	...require('./handlers.js'),
-	...require('./server.js')
+	...require('./server.js'),
+	util: require('./util.js')
 };
