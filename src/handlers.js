@@ -208,7 +208,7 @@ class JSONHandler {
     }
 
     handle(ctx, env) {
-        ctx.res.writeHead(this.statusCode, this._headers);
+        ctx.res.writeHead(this._statusCode, this._headers);
         ctx.res.end(this.data);
     }
 }
