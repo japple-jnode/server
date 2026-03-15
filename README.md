@@ -87,6 +87,17 @@ Also, we provide some powerful built-in routers and handlers so you can start bu
 - `max` [\<number\>](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#number_type) Max bytes can receive, throws `413` when out of max size. **Default:** `1048576`.
 - Returns: [\<Buffer\>](https://nodejs.org/docs/latest/api/buffer.html#class-buffer)
 
+Receive body from request.
+
+### `server.util.setCookie(res, key, value[, options])`
+
+- `res` [\<http.ServerResponse\>](https://nodejs.org/docs/latest/api/http.html#class-httpserverresponse) | [\<http2.Http2ServerResponse\>](https://nodejs.org/docs/latest/api/http2.html#class-http2http2serverresponse) The response object.
+- `key` [\<string\>](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#string_type) Cookie key.
+- `value` [\<string\>](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#string_type) Cookie value.
+- `options` [\<Object\>](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object) Cookie options.
+
+Set cookie.
+
 ## `server.createServer(router[, options])`
 
 - `router` [router](#class-serverrouter) | [handler-extended](#handler-extended) Same as the full filled return value of [`router.route(env, ctx)`](#routerrouteenv-ctx).

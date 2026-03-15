@@ -7,6 +7,9 @@ Simple web server package for Node.js.
 by JustApple
 */
 
+// dependencies
+const qs = require('querystring');
+
 // receive body
 function receiveBody(req, max = 1024 * 1024) {
     return new Promise((resolve, reject) => {
@@ -25,7 +28,21 @@ function receiveBody(req, max = 1024 * 1024) {
     });
 }
 
+function setCookie(res, key, value, options) {
+    const cookieHeaders = res.getHeader('set-cookie');
+    const cookie = `${key}=${encodeURIComponent(value)}` + options ? '; ' + qs.stringify(options, '; ', '=') : '';
+    if (Array.isArray(cookieHeaders)) {
+        cookieHeaders.push(cookie);
+        res.setHeader('Set-Cookie', cookieHeaders);
+    } else if (cookieHeaders === undefined) {
+        res.setHeader('Set-Cookie', cookie);
+    } else {
+        res.setHeader('Set-Cookie', [cookieHeaders, cookie]);
+    }
+}
+
 // export
 module.exports = {
-    receiveBody
+    receiveBody,
+    setCookie
 };
