@@ -11,7 +11,7 @@ by JustApple
 const http = require('http');
 const https = require('https');
 const http2 = require('http2');
-const path = require('path');
+const qs = require('querystring');
 const stream = require('stream');
 const EventEmitter = require('events');
 
@@ -56,7 +56,8 @@ class Server extends EventEmitter {
                 headers: req.headers,
                 identity: { address: req.socket.remoteAddress, port: req.socket.remotePort },
                 params: Object.fromEntries(url.searchParams.entries()),
-                body: req
+                body: req,
+                cookie: req.headers.cookie ? qs.parse(req.headers.cookie, '; ', '=') : {}
             };
 
             // the environment object, mainly for routers
