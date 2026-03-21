@@ -1,8 +1,15 @@
 {
   "name": "@jnode/server",
-  "version": "2.3.7",
+  "version": "2.3.8",
   "description": "Simple web server package for Node.js.",
   "main": "src/index.js",
+  "exports": {
+    ".": "./src/index.js",
+    "./handlers": "./src/handlers.js",
+    "./routers": "./src/routers.js",
+    "./util": "./src/util.js",
+    "./mime": "./src/mime.json"
+  },
   "scripts": {
     "test": "echo \"Hello, server.\""
   },
