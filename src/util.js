@@ -31,9 +31,10 @@ function setCookie(res, key, value, options) {
 
     if (options) {
         for (let i in options) {
+            if (!options[i]) continue;
             cookie += '; ';
             cookie += i;
-            cookie += options[i] === true ? '' : options[i] ? '=' + options[i] : '';
+            cookie += options[i] === true ? '' : '=' + options[i];
         }
     }
 
