@@ -79,6 +79,7 @@ class Server extends EventEmitter {
                 if (handler === undefined || handler === null) handler = 404;
             } catch (e) { // error while routing
                 this.emit('e', e, env, ctx);
+                env.error = e;
                 handler = 500;
             }
 
@@ -159,6 +160,7 @@ class Server extends EventEmitter {
             }
         } catch (e) { // error while handling
             if (typeof e !== 'number') ctx.server.emit('e', e, env, ctx);
+            env.error = e;
 
             try {
                 const code = (typeof e === 'number') ? e : 500;
@@ -192,7 +194,7 @@ class Server extends EventEmitter {
             } catch (e) { // error while handling the error while handling :)
                 ctx.server.emit('warn', e, env, ctx);
                 try { ctx.res.writeHead(500, { 'Content-Type': 'text/plain; charset=utf-8' }); } catch { }
-                try { ctx.res.end('500 Internal Server Error', 'utf8'); } catch { }
+                try { ctx.res.end(`500 Internal Server Error\nMessage: ${(typeof env.error === 'string') ? env.error : env.error?.message ?? 'Unknown error.'}`, 'utf8'); } catch { }
             }
         }
     }
