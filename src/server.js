@@ -163,7 +163,7 @@ class Server extends EventEmitter {
             env.error = e;
 
             try {
-                const code = (typeof e === 'number') ? e : 500;
+                const code = (typeof e === 'number') ? e : e?.statusCode ?? 500;
                 handler = env.codeHandlers[code] ?? env.codeHandlers['000'];
 
                 // handlers without code handlers
@@ -189,7 +189,7 @@ class Server extends EventEmitter {
                     await stream.promises.pipeline(handler, ctx.res);
                 } else { // use default status code response
                     ctx.res.writeHead(code, { 'Content-Type': 'text/plain; charset=utf-8' });
-                    ctx.res.end(`${code} ${http.STATUS_CODES[code] || 'Unknown'}`, 'utf8');
+                    ctx.res.end(`${code} ${http.STATUS_CODES[code] || 'Unknown'}\nMessage: ${(typeof env.error === 'string') ? env.error : env.error?.message ?? 'Unknown error.'}`, 'utf8');
                 }
             } catch (e) { // error while handling the error while handling :)
                 ctx.server.emit('warn', e, env, ctx);

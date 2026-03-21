@@ -166,6 +166,9 @@ This class is a base interface that defines the structure of a **router**; it do
   - `codeHandlers` [\<Object\>](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object) Keys are HTTP status codes, and values are [handlers-extended](#handler-extended). `'000'` as default/fallback error handler.
   - `i` [\<number\>](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#number_type) How many routers the request has gone through; do not change it in your own routers because the main loop increments it.
   - `error` [\<string\>](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#string_type) | [\<Error\>](https://nodejs.org/api/errors.html#class-error) Error object or error message.
+    - `message` [\<string\>](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#string_type) Error message string.
+    - `code` [\<string\>](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#string_type) Error message string code.
+    - `statusCode` [\<number\>](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#number_type) Error HTTP status code.
 - `ctx` [\<Object\>](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object)
   - `req` [\<http.IncomingMessage\>](https://nodejs.org/docs/latest/api/http.html#class-httpincomingmessage) | [\<http2.Http2ServerRequest\>](https://nodejs.org/docs/latest/api/http2.html#class-http2http2serverrequest) The request object.
   - `res` [\<http.ServerResponse\>](https://nodejs.org/docs/latest/api/http.html#class-httpserverresponse) | [\<http2.Http2ServerResponse\>](https://nodejs.org/docs/latest/api/http2.html#class-http2http2serverresponse) The response object.
