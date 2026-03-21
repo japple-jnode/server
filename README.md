@@ -106,6 +106,7 @@ Set cookie.
   - `enableHTTP2` [\<boolean\>](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#boolean_type) Enable HTTP/2 support (with `node:http2` [Compatibility API](https://nodejs.org/docs/latest/api/http2.html#compatibility-api)). **Default:** `false`.
   - `codeHandlers` [\<Object\>](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object) Global status code handlers. Keys are HTTP status codes, values are [handlers-extended](#handler-extended).
   - Options in [`http.createServer()`](https://nodejs.org/docs/latest/api/http.html#httpcreateserveroptions-requestlistener), [`https.createServer()`](https://nodejs.org/docs/latest/api/https.html#httpscreateserveroptions-requestlistener), [`http2.createServer()`](https://nodejs.org/docs/latest/api/http2.html#http2createserveroptions-onrequesthandler), or [`http2.createSecureServer()`](https://nodejs.org/docs/latest/api/http2.html#http2createsecureserveroptions-onrequesthandler).
+  - `showErrorMessage` [\<boolean\>](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Data_structures#boolean_type) Shows error message in default handler. **Default:** `false`.
 - Returns: [\<server.Server\>](#class-serverserver)
 
 We will check if `options.key` and `options.cert` exist to decide whether to enable TLS or not. Note that most browsers reject insecure HTTP/2.

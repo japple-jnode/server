@@ -152,8 +152,9 @@ class Server extends EventEmitter {
                     ctx.res.writeHead(code, { 'Content-Type': 'application/octet-stream' });
                     await stream.promises.pipeline(handler, ctx.res);
                 } else { // use default status code response
+                    const message = options.showErrorMessage ? (typeof env.error === 'string') ? env.error : env.error?.message ?? '' : '';
                     try { ctx.res.writeHead(code, { 'Content-Type': 'text/plain; charset=utf-8' }); } catch { }
-                    try { ctx.res.end(`${code} ${http.STATUS_CODES[code] || 'Unknown'}`, 'utf8'); } catch { }
+                    try { ctx.res.end(`${code} ${http.STATUS_CODES[code] || 'Unknown'}${message ? `\nMessage: ${message}` : ''}`, 'utf8'); } catch { }
                 }
             } else { // invalid handler
                 throw new Error('JNS: Invalid handler returned from router.');
@@ -188,13 +189,15 @@ class Server extends EventEmitter {
                     ctx.res.writeHead(code, { 'Content-Type': 'application/octet-stream' });
                     await stream.promises.pipeline(handler, ctx.res);
                 } else { // use default status code response
+                    const message = options.showErrorMessage ? (typeof env.error === 'string') ? env.error : env.error?.message ?? '' : '';
                     ctx.res.writeHead(code, { 'Content-Type': 'text/plain; charset=utf-8' });
-                    ctx.res.end(`${code} ${http.STATUS_CODES[code] || 'Unknown'}\nMessage: ${(typeof env.error === 'string') ? env.error : env.error?.message ?? 'Unknown error.'}`, 'utf8');
+                    ctx.res.end(`${code} ${http.STATUS_CODES[code] || 'Unknown'}${message ? `\nMessage: ${message}` : ''}`, 'utf8');
                 }
             } catch (e) { // error while handling the error while handling :)
                 ctx.server.emit('warn', e, env, ctx);
+                const message = options.showErrorMessage ? (typeof env.error === 'string') ? env.error : env.error?.message ?? '' : '';
                 try { ctx.res.writeHead(500, { 'Content-Type': 'text/plain; charset=utf-8' }); } catch { }
-                try { ctx.res.end(`500 Internal Server Error\nMessage: ${(typeof env.error === 'string') ? env.error : env.error?.message ?? 'Unknown error.'}`, 'utf8'); } catch { }
+                try { ctx.res.end(`500 Internal Server Error${message ? `\nMessage: ${message}` : ''}`, 'utf8'); } catch { }
             }
         }
     }
