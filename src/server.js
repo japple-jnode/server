@@ -14,6 +14,7 @@ const http2 = require('http2');
 const qs = require('querystring');
 const stream = require('stream');
 const EventEmitter = require('events');
+const util = require('./util.js');
 
 // server class
 class Server extends EventEmitter {
@@ -57,7 +58,9 @@ class Server extends EventEmitter {
                 identity: { address: req.socket.remoteAddress, port: req.socket.remotePort },
                 params: Object.fromEntries(url.searchParams.entries()),
                 body: req,
-                cookie: req.headers.cookie ? qs.parse(req.headers.cookie, '; ', '=') : {}
+                cookie: req.headers.cookie ? qs.parse(req.headers.cookie, '; ', '=') : {},
+                receiveBody: function (max) { return stream.isReadable(this.body) ? util.receiveBody(this.body, max) : this.body },
+                setCookie: function (key, value, options) { return util.setCookie(this.res, key, value, options); }
             };
 
             // the environment object, mainly for routers

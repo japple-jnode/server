@@ -180,6 +180,8 @@ This class is a base interface that defines the structure of a **router**; it do
   - `params` [\<Object\>](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object) The parameters including query string parameters; could also be injected by routers.
   - `body` [\<stream.Readable\>](https://nodejs.org/docs/latest/api/stream.html#class-streamreadable) The request body stream (`req`) or anything depends on the routers you used.
   - `cookie` [\<Object\>](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object) The parsed cookie object.
+  - `receiveBody([max])` [\<Function\>](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function) Same as [`server.util.receiveBody(req[, max])`](#serverutilreceivebodyreq-max).
+  - `setCookie(key, value, options)` [\<Function\>](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function) Same as [`server.util.setCookie(res, key, value[, options])`](#serverutilsetcookieres-key-value-options).
 
 - Returns: [\<Promise\>](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise) | [\<router\>](#class-serverrouter) | [handler-extended](#handler-extended) Fulfills with a [router](#class-serverrouter) or [handler-extended](#handler-extended). Promise is not strictly required; synchronous functions are also acceptable.
 
