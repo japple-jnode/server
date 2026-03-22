@@ -160,8 +160,10 @@ class Server extends EventEmitter {
                 throw new Error('JNS: Invalid handler returned from router.');
             }
         } catch (e) { // error while handling
-            if (typeof e !== 'number' && !(e?.statusCode)) ctx.server.emit('e', e, env, ctx);
-            env.error = e;
+            if (typeof e !== 'number' && !(e?.statusCode)) {
+                ctx.server.emit('e', e, env, ctx);
+                env.error = e;
+            }
 
             try {
                 const code = (typeof e === 'number') ? e : e?.statusCode ?? 500;
