@@ -11,7 +11,6 @@ by JustApple
 const http = require('http');
 const https = require('https');
 const http2 = require('http2');
-const qs = require('querystring');
 const stream = require('stream');
 const EventEmitter = require('events');
 const util = require('./util.js');
@@ -65,6 +64,7 @@ class Server extends EventEmitter {
                         const equal = i.indexOf('=');
                         cookies[i.slice(0, equal)] = i.slice(equal + 1);
                     }
+                    return cookies;
                 })() : {},
                 receiveBody: function (max) { return stream.isReadable(this.body) ? util.receiveBody(this.body, max) : this.body },
                 setCookie: function (key, value, options) { return util.setCookie(this.res, key, value, options); }
