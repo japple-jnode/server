@@ -58,7 +58,14 @@ class Server extends EventEmitter {
                 identity: { address: req.socket.remoteAddress, port: req.socket.remotePort },
                 params: Object.fromEntries(url.searchParams.entries()),
                 body: req,
-                cookie: req.headers.cookie ? qs.parse(req.headers.cookie, '; ', '=') : {},
+                cookie: req.headers.cookie ? (() => {
+                    const arr = req.headers.cookie.split('; ');
+                    const cookies = {};
+                    for (let i of arr) {
+                        const equal = i.indexOf('=');
+                        cookies[i.slice(0, equal)] = i.slice(equal + 1);
+                    }
+                })() : {},
                 receiveBody: function (max) { return stream.isReadable(this.body) ? util.receiveBody(this.body, max) : this.body },
                 setCookie: function (key, value, options) { return util.setCookie(this.res, key, value, options); }
             };
